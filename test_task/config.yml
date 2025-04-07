@@ -1,0 +1,46 @@
+task_name: test_task
+
+prompt: >
+    Identify and annotate words or phrases in the text that correspond to the following categories.
+    - protein_type
+    - taxonomy_domain
+    - protein
+    - structure_element
+    - evidence
+    - protein_state
+    - site
+    - chemical
+    - species
+    - residue_range
+    - ptm
+    - residue_name_number
+    - gene
+    - oligomeric_state
+    - residue_number
+
+    ### OUTPUT FORMAT
+    For each identified entity, output an XML-formatted annotation in the following format:
+    <annotation entity='[entity]' type='[type]'/>
+
+    ### INPUT TEXT
+    {input_text}
+
+models_list:
+  - gpt-4o
+
+dataset_separator: \t
+
+preprocess:
+  name: test_task.regex_filter
+  params:
+    pattern: "<annotation [^>]*>"
+    all: true
+
+scoring:
+  - test_task.compute_set_precision
+  - test_task.compute_set_recall
+
+aggregation: 
+  - mean
+  - median
+

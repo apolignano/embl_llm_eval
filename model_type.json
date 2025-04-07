@@ -1,0 +1,5 @@
+{
+    "gemma3:4b": "ollama",
+    "gpt-4o": "openai",
+    "gemma3:27b": "ollama"
+}
