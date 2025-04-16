@@ -1,8 +1,10 @@
+import importlib.util
 import os
 import yaml
 import logging
 import pandas as pd
 import importlib
+import sys
 
 def validate_task_folder(task_folder):
     """Check if the task folder exists and contains the required files."""
@@ -50,17 +52,24 @@ def validate_dataset(dataset_path, sep=","):
     if "target" not in df.columns:
         raise ValueError("'dataset.csv' must contain a 'target' column.")
     
-    return df["input"].tolist(), df["target"].tolist()
+    return df
 
-def import_task_func(task_name: str, func_type: str, func_name: str):
+def import_from_path(module_name, file_path):
+
+    spec = importlib.util.spec_from_file_location("", f"{file_path}/functions.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+def import_task_func(task_path: str, func_name: str, func_type: str = None):
 
     if "." in func_name: 
-        module_to_import = f"{task_name}.functions"
         func_name = func_name.split(".")[1]
+        module_functions = import_from_path("functions", task_path)
     else:
-        module_to_import = func_type
+        module_functions = importlib.import_module(func_type)
 
-    module_functions = importlib.import_module(module_to_import)
     preprocess_func = getattr(module_functions, func_name)
     
     return preprocess_func

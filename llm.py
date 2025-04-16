@@ -5,14 +5,14 @@ class Response(BaseModel):
     short_reason: str
     result: str
 
-def compose_prompt(prompt_template, input_text):
+def compose_prompt(prompt_template, input_text, params):
     """Format the prompt using the provided input text."""
-    return prompt_template.format(input_text=input_text)
+    return prompt_template.format(input_text=input_text, **params)
 
-def compose_messages(prompt_template, input_text):
+def compose_messages(prompt_template, input_text, params):
     return [{
                 "role": "user",
-                "content": compose_prompt(prompt_template, input_text)
+                "content": compose_prompt(prompt_template, input_text, params)
             },
             # {
             #     "role": "user",
@@ -20,14 +20,14 @@ def compose_messages(prompt_template, input_text):
             # }
         ]
 
-def ask_llm(clients, client_type, model, prompt_template, input_text):
+def ask_llm(clients, client_type, model, prompt_template, input_text, params):
 
     client = clients[client_type]
 
     if client_type == "openai":
         response = client.beta.chat.completions.parse(
             model=model,
-            messages=compose_messages(prompt_template, input_text),
+            messages=compose_messages(prompt_template, input_text, params),
             # response_format=Response,
             temperature=0
         )
@@ -37,7 +37,7 @@ def ask_llm(clients, client_type, model, prompt_template, input_text):
     elif client_type == "ollama":
         response = chat(
             model=model,
-            messages=compose_messages(prompt_template, input_text),
+            messages=compose_messages(prompt_template, input_text, params),
             # format=Response.model_json_schema(),
             options={'temperature': 0}, 
         )
